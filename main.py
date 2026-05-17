@@ -465,6 +465,10 @@ async def serve_frontend():
     Serves the jeff-ui.html frontend directly from the root URL.
     This allows easy testing on Render without needing WordPress.
     """
-    if os.path.exists("jeff-ui.html"):
-        return FileResponse("jeff-ui.html")
-    return {"message": "Jeff AI Agent API is running. (Frontend file not found)"}
+    # Use absolute path based on this file's location to avoid working directory issues
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    ui_path = os.path.join(base_dir, "jeff-ui.html")
+    
+    if os.path.exists(ui_path):
+        return FileResponse(ui_path)
+    return {"message": f"Jeff AI Agent API is running. (Frontend file not found at {ui_path})"}
