@@ -4,5 +4,3 @@ venv/
 .venv/
 *.pyc
 .DS_Store
-jeff*
-project info.md
