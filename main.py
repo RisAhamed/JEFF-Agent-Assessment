@@ -17,7 +17,7 @@ import uuid
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from typing import Optional
 from pydantic import BaseModel
 from groq import Groq
@@ -456,3 +456,15 @@ async def get_history(session_id: str):
         elif isinstance(msg, AIMessage):
             messages.append({"role": "assistant", "content": msg.content})
     return {"session_id": session_id, "message_count": len(messages), "messages": messages}
+
+
+@app.get("/")
+async def serve_frontend():
+    """
+    GET /
+    Serves the jeff-ui.html frontend directly from the root URL.
+    This allows easy testing on Render without needing WordPress.
+    """
+    if os.path.exists("jeff-ui.html"):
+        return FileResponse("jeff-ui.html")
+    return {"message": "Jeff AI Agent API is running. (Frontend file not found)"}
