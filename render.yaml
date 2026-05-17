@@ -1,0 +1,50 @@
+# render.yaml — Render.com Blueprint (Infrastructure as Code)
+# ─────────────────────────────────────────────────────────────────
+# Place this file in the ROOT of your jeff-agent/ project.
+# Render auto-detects it when you connect your GitHub repo.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Candidate: Riswan Ahamed M | JustStartUP Assessment Task 01
+# ─────────────────────────────────────────────────────────────────
+
+services:
+  - type: web                   # Web service (HTTP-accessible)
+    name: jeff-ai-agent         # Service name shown in Render dashboard
+    runtime: python             # Python runtime
+    region: oregon              # US West — change to "frankfurt" for lower EU latency
+
+    plan: free                  # Free tier (spins down after 15min inactivity)
+                                # Upgrade to "starter" ($7/mo) to eliminate cold starts
+
+    # ── Build ────────────────────────────────────────────────────
+    # Runs once on each deploy to install dependencies
+    buildCommand: pip install -r requirements.txt
+
+    # ── Start ────────────────────────────────────────────────────
+    # IMPORTANT: Use $PORT — Render injects this dynamically.
+    # NEVER hardcode 8000 or any port in production.
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+    # ── Health Check ─────────────────────────────────────────────
+    # Render pings this endpoint to verify the service is alive.
+    # Also used by UptimeRobot to prevent free-tier cold starts.
+    healthCheckPath: /health
+
+    # ── Auto Deploy ──────────────────────────────────────────────
+    # Automatically redeploys whenever you push to the main branch.
+    autoDeploy: true
+
+    # ── Environment Variables ────────────────────────────────────
+    # sync: false = value NOT stored in this file (security best practice).
+    # After connecting your repo in Render:
+    #   Dashboard → jeff-ai-agent → Environment → Add Environment Variable
+    #   Key: GROQ_API_KEY
+    #   Value: gsk_your_actual_groq_api_key_here
+    #
+    # Render encrypts secrets at rest — they are never exposed in logs.
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false             # ← Enter this value manually in Render dashboard
+
+      - key: PYTHON_VERSION
+        value: "3.11.0"        # Pin Python version for reproducible builds
